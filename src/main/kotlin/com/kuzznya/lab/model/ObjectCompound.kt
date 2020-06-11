@@ -34,6 +34,6 @@ class ObjectCompound(objects: List<DrawablePhysObject>, speed: Vector) :
         return false
     }
 
-    override fun render(ctx: GraphicsContext) =
-        objects.forEach { it.render(ctx) }
+    override fun render(ctx: GraphicsContext, scale: Scale) =
+        objects.forEach { it.render(ctx, scale) }
 }

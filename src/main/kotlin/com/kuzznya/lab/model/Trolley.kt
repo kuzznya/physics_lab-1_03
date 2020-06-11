@@ -2,6 +2,7 @@ package com.kuzznya.lab.model
 
 import javafx.scene.canvas.GraphicsContext
 import javafx.scene.paint.Color
+import kotlin.math.abs
 
 class Trolley (
     mass: Double,
@@ -18,12 +19,11 @@ class Trolley (
                 point.y > position.y - height / 2.0 &&
                 position.y < position.y + height / 2.0
 
-    override fun render(ctx: GraphicsContext) {
-        val prevColor = ctx.fill
-
+    override fun render(ctx: GraphicsContext, scale: Scale) {
         ctx.fill = color
-        ctx.fillRect(position.x - width / 2.0, position.y - height / 2.0, width, height)
-
-        ctx.fill = prevColor
+        val pos = scale.transform(Point(position.x - width / 2.0, position.y - height / 2.0))
+//        println(pos)
+//        println("${scale.transformX(width)}, ${scale.transformY(height)}")
+        ctx.fillRect( pos.x, pos.y, abs(scale.transformX(width)), abs(scale.transformY(height)))
     }
 }
