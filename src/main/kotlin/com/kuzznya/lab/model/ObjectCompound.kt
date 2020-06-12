@@ -6,7 +6,15 @@ class ObjectCompound(objects: List<DrawablePhysObject>, speed: Vector) :
     DrawablePhysObject(objects.sumByDouble { it.mass }, Point(
         objects.sumByDouble { it.mass * it.position.x } / objects.sumByDouble { it.mass },
         objects.sumByDouble { it.mass * it.position.y } / objects.sumByDouble { it.mass }
-    ), speed) {
+    ), speed,
+        objects.maxBy { it.position.x + it.width / 2.0 }!!
+            .let {it.position.x + it.width / 2.0}
+                - objects.minBy { it.position.x - it.width / 2.0 }!!
+            .let {it.position.x - it.width / 2.0},
+        objects.maxBy { it.position.y + it.height / 2.0 }!!
+            .let {it.position.y + it.height / 2.0}
+                - objects.minBy { it.position.y - it.height / 2.0 }!!
+            .let {it.position.y - it.height / 2.0}) {
 
     private lateinit var objects: List<DrawablePhysObject>
 
@@ -36,4 +44,6 @@ class ObjectCompound(objects: List<DrawablePhysObject>, speed: Vector) :
 
     override fun render(ctx: GraphicsContext, scale: Scale) =
         objects.forEach { it.render(ctx, scale) }
+
+    override fun onTheGround(ground: Ground): Boolean = objects.any { it.onTheGround(ground) }
 }

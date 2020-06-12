@@ -5,5 +5,7 @@ import com.kuzznya.lab.view.Drawable
 abstract class DrawablePhysObject (
     mass: Double,
     position: Point,
-    speed: Vector
-) : PhysObject(mass, position, speed), Drawable
+    speed: Vector,
+    width: Double,
+    height: Double
+) : PhysObject(mass, position, speed, width, height), Drawable

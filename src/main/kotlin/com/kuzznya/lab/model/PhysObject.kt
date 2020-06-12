@@ -2,26 +2,24 @@ package com.kuzznya.lab.model
 
 import kotlin.math.cos
 import kotlin.math.pow
+import kotlin.math.sign
 import kotlin.math.sin
 
 abstract class PhysObject (
     open var mass: Double,
     open var position: Point,
-    var speed: Vector
+    open var speed: Vector,
+    open var width: Double,
+    open var height: Double
 ) {
     open fun move(secondsPassed: Double) {
-        position.x += speed.x * secondsPassed
-        position.y += speed.y * secondsPassed
+        position += speed * secondsPassed
     }
 
     open fun move(secondsPassed: Double, acceleration: Vector) {
         move(secondsPassed)
-
-        position.x += acceleration.x.pow(2) * secondsPassed / 2
-        position.y += acceleration.y.pow(2) * secondsPassed / 2
-
-        speed.x += acceleration.x * secondsPassed
-        speed.y += acceleration.y * secondsPassed
+        position += acceleration * secondsPassed.pow(2) / 2.0
+        speed += acceleration * secondsPassed
     }
 
     fun turn(angle: Double) {
@@ -29,5 +27,11 @@ abstract class PhysObject (
              speed.y * cos(angle) + speed.x * sin(angle))
     }
 
-    abstract fun intersects(point: Point): Boolean
+    open fun intersects(point: Point): Boolean =
+        point.x > position.x - width / 2.0 &&
+                position.x < position.x + width / 2.0 &&
+                point.y > position.y - height / 2.0 &&
+                position.y < position.y + height / 2.0
+
+    abstract fun onTheGround(ground: Ground): Boolean
 }
