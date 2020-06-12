@@ -21,9 +21,8 @@ class Trolley (
 
     override fun render(ctx: GraphicsContext, scale: Scale) {
         ctx.fill = color
-        val pos = scale.transform(Point(position.x - width / 2.0, position.y - height / 2.0))
-//        println(pos)
-//        println("${scale.transformX(width)}, ${scale.transformY(height)}")
-        ctx.fillRect( pos.x, pos.y, abs(scale.transformX(width)), abs(scale.transformY(height)))
+        val pos = scale.transform(Point(position.x - width / 2.0, position.y + height / 2.0))
+        println("$pos ${abs(scale.transformX(width))} ${abs(scale.transformX(height))}")
+        ctx.fillRect(pos.x, pos.y, abs(scale.transformX(width)), abs(scale.transformY(height)))
     }
 }
