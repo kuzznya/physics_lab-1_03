@@ -8,4 +8,7 @@ data class Point (
         x += v.x
         y += v.y
     }
+
+    operator fun plus(v: Vector) =
+        Point(x + v.x, y + v.y)
 }
