@@ -11,4 +11,7 @@ data class Point (
 
     operator fun plus(v: Vector) =
         Point(x + v.x, y + v.y)
+
+    operator fun minus(p: Point): Vector =
+        Vector(x - p.x, y - p.y)
 }

@@ -2,7 +2,13 @@ package com.kuzznya.lab.model
 
 import javafx.scene.canvas.GraphicsContext
 
-class Ground : DrawablePhysObject(6E24, Point(0.0, 0.0), Vector(0.0, 0.0), 10000.0, 1.0) {
+class Ground : DrawablePhysObject(
+    6E24,
+    Point(0.0, 0.0),
+    Vector(0.0, 0.0),
+    10000.0,
+    1.0
+) {
 
     override var speed: Vector
         get() = Vector(0.0, 0.0)
@@ -13,12 +19,18 @@ class Ground : DrawablePhysObject(6E24, Point(0.0, 0.0), Vector(0.0, 0.0), 10000
     override fun move(secondsPassed: Double, acceleration: Vector) {}
 
     override fun intersects(point: Point): Boolean =
-        point.y < super.position.y
+        point.y < position.y
+
+    override fun intersects(body2: PhysObject): Boolean =
+        (body2.position.y - body2.height / 2.0) <= position.y
 
     override fun render(ctx: GraphicsContext, scale: Scale) {
-        val pos0 = scale.transform(super.position)
+        val pos0 = scale.transform(position)
         ctx.strokeLine(0.0, pos0.y, ctx.canvas.width, pos0.y)
     }
 
     override fun onTheGround(ground: Ground): Boolean = true
+
+    val normal: Vector
+        get() = Vector(0.0, 1.0)
 }

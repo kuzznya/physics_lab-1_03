@@ -14,10 +14,7 @@ class Trolley (
 ) : DrawablePhysObject(mass, position, speed, width, height) {
     override fun render(ctx: GraphicsContext, scale: Scale) {
         ctx.fill = color
-        val pos = scale.transform(Point(position.x - width / 2.0, position.y))
+        val pos = scale.transform(Point(position.x - width / 2.0, position.y + height / 2.0))
         ctx.fillRect(pos.x, pos.y, abs(scale.transformX(width)), abs(scale.transformY(height)))
     }
-
-    override fun onTheGround(ground: Ground): Boolean =
-        (position.y - height / 2.0) - ground.position.y < 0.1
 }
