@@ -11,6 +11,9 @@ data class Vector (
     operator fun plus(b: Vector): Vector =
         Vector(x + b.x, y + b.y)
 
+    operator fun minus(b: Vector): Vector =
+        this + b * -1.0
+
     operator fun times(k: Double): Vector =
         Vector(x * k, y * k)
 

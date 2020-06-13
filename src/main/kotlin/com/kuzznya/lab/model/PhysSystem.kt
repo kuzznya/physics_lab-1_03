@@ -1,9 +1,8 @@
 package com.kuzznya.lab.model
 
 import kotlinx.coroutines.delay
-import kotlinx.coroutines.runBlocking
-import kotlinx.coroutines.runInterruptible
 import kotlin.math.PI
+import kotlin.math.abs
 import kotlin.math.cos
 import kotlin.math.sin
 
@@ -18,10 +17,7 @@ class PhysSystem (
         objects += ground
     }
 
-    private val isObjectOnTheGround: MutableMap<PhysObject, Boolean> =
-        objects.associateWith { it.onTheGround(ground) }.toMutableMap()
-
-    private fun getAcceleration(body: PhysObject): Vector {
+    private fun getAcceleration(body: PhysObject, secondsPassed: Double): Vector {
         if (body is Ground)
             return Vector(0.0, 0.0)
 
@@ -37,8 +33,8 @@ class PhysSystem (
 
         val centersVector: Vector =
             when {
-                body1 is Ground -> body1.normal * -1.0
-                body2 is Ground -> body2.normal * -1.0
+                body1 is Ground -> body1.normal
+                body2 is Ground -> body2.normal
                 else -> body2.position - body1.position
             }
 
@@ -55,11 +51,11 @@ class PhysSystem (
             body1.speed = (v1c * (body1.mass - body2.mass) + v2c * 2.0 * body2.mass) / (body1.mass + body2.mass) + v1p
             body2.speed = (v2c * (body2.mass - body1.mass) + v1c * 2.0 * body1.mass) / (body1.mass + body2.mass) + v2p
 
-            if (body2 is Ground) body1.speed.y /= 2.0
-            if (body1 is Ground) body2.speed.y /= 2.0
+            if (body2 is Ground) body1.speed.y /= 1.8
+            if (body1 is Ground) body2.speed.y /= 1.8
 
-            body1.move(0.001)
-            body2.move(0.001)
+            body1.move(0.01)
+            body2.move(0.01)
         }
         else {
             TODO("non-elastic collision")
@@ -83,7 +79,7 @@ class PhysSystem (
     private fun checkForGround(body: PhysObject) {
         if (body is Ground)
             return
-        if ((body.intersects(ground) || ground.intersects(body)) && body.speed.y < 0.0) {
+        if ((body.intersects(ground) || ground.intersects(body)) && abs(body.speed.y) < 0.2) {
             body.speed.y = 0.0
             body.position.y = ground.position.y + body.height / 2.0
         }
@@ -92,14 +88,14 @@ class PhysSystem (
     fun compute(secondsPassed: Double) {
         objects.forEach { body1 -> objects.forEach { body2 -> checkAndCollide(body1, body2) } }
         for ((i, body1) in objects.withIndex()) {
-//            checkForGround(body1)
             for (body2 in objects.filterIndexed { index, _ -> index > i }) {
                 checkAndCollide(body1, body2)
             }
         }
         objects.forEach {
             checkForGround(it)
-            it.move(secondsPassed, getAcceleration(it)) }
+            it.move(secondsPassed, getAcceleration(it, secondsPassed))
+        }
         collided.clear()
     }
 
