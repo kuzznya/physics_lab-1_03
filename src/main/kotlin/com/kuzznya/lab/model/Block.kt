@@ -4,7 +4,7 @@ import javafx.scene.canvas.GraphicsContext
 import javafx.scene.paint.Color
 import kotlin.math.abs
 
-class Trolley (
+class Block (
     mass: Double,
     position: Point,
     speed: Vector,

@@ -13,8 +13,8 @@ class ModelEngine (
     private val canvas: Canvas
 ) {
     val objects: MutableList<DrawablePhysObject> = listOf(
-        Trolley(1.0, Point(0.0, 10.0), Vector(5.0, 20.0), 5.0, 5.0, Color.DARKBLUE),
-        Trolley(5.0, Point(50.0, 15.0), Vector(-10.0, 20.0), 10.0, 10.0, Color.DARKRED)
+        Block(1.0, Point(0.0, 10.0), Vector(5.0, 20.0), 5.0, 5.0, Color.DARKBLUE),
+        Block(5.0, Point(50.0, 15.0), Vector(-10.0, 20.0), 10.0, 10.0, Color.DARKRED)
     ).toMutableList()
 
     val system: PhysSystem = PhysSystem(objects, Ground())
