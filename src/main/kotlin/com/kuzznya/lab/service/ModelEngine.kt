@@ -1,25 +1,27 @@
 package com.kuzznya.lab.service
 
 import com.kuzznya.lab.model.*
+import com.kuzznya.lab.physics.model.Block
+import com.kuzznya.lab.physics.model.DrawablePhysObject
+import com.kuzznya.lab.physics.model.Ground
+import com.kuzznya.lab.physics.service.PhysSystem
 import javafx.application.Platform
 import javafx.scene.canvas.Canvas
 import javafx.scene.paint.Color
+import kotlinx.coroutines.CoroutineStart
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlin.math.min
 
 class ModelEngine (
+    objects: MutableList<DrawablePhysObject>,
     private val canvas: Canvas
 ) {
-    val objects: MutableList<DrawablePhysObject> = listOf(
-        Block(1.0, Point(0.0, 20.0), Vector(25.0, 20.0), 10.0, 10.0, Color.DARKBLUE),
-        Block(5.0, Point(50.0, 20.0), Vector(10.0, 20.0), 10.0, 10.0, Color.DARKRED)
-    ).toMutableList()
+    val system: PhysSystem =
+        PhysSystem(objects, Ground())
 
-    val system: PhysSystem = PhysSystem(objects, Ground())
-
-    fun render() = Platform.runLater {
+    private fun render() = Platform.runLater {
         val ctx = canvas.graphicsContext2D
         ctx.fill = Color.WHITE
         ctx.fillRect(0.0, 0.0, canvas.width, canvas.height)
@@ -41,7 +43,7 @@ class ModelEngine (
         }
     }
 
-    suspend fun start() = GlobalScope.launch {
+    val computation = GlobalScope.launch(start = CoroutineStart.LAZY) {
         launch { system.start() }
         while (true) {
             render()
