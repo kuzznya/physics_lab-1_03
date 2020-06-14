@@ -13,20 +13,20 @@ class ModelEngine (
     private val canvas: Canvas
 ) {
     val objects: MutableList<DrawablePhysObject> = listOf(
-        Block(1.0, Point(0.0, 10.0), Vector(5.0, 20.0), 5.0, 5.0, Color.DARKBLUE),
-        Block(5.0, Point(50.0, 15.0), Vector(-10.0, 20.0), 10.0, 10.0, Color.DARKRED)
+        Block(1.0, Point(0.0, 20.0), Vector(25.0, 20.0), 10.0, 10.0, Color.DARKBLUE),
+        Block(5.0, Point(50.0, 20.0), Vector(10.0, 20.0), 10.0, 10.0, Color.DARKRED)
     ).toMutableList()
 
     val system: PhysSystem = PhysSystem(objects, Ground())
 
-    suspend fun render() = Platform.runLater {
+    fun render() = Platform.runLater {
         val ctx = canvas.graphicsContext2D
         ctx.fill = Color.WHITE
         ctx.fillRect(0.0, 0.0, canvas.width, canvas.height)
 
         val scale = Scale(
-            Point(-50.0, -10.0),
-            Point(50.0, 90.0),
+            Point(-100.0, -60.0),
+            Point(100.0, 140.0),
             0.0,
             min(canvas.width, canvas.height),
             true
@@ -43,9 +43,9 @@ class ModelEngine (
 
     suspend fun start() = GlobalScope.launch {
         launch { system.start() }
-        repeat(Int.MAX_VALUE) {
+        while (true) {
             render()
-            delay(50)
+            delay(1)
         }
     }
 }

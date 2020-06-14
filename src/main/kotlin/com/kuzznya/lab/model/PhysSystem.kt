@@ -102,10 +102,10 @@ class PhysSystem (
     suspend fun start() {
         var time = System.currentTimeMillis()
         objects.forEach { checkForGround(it) }
-        repeat(Int.MAX_VALUE) {
+        while (true) {
             compute((System.currentTimeMillis() - time) / 1000.0)
             time = System.currentTimeMillis()
-            delay(20)
+            delay(1)
         }
     }
 }
