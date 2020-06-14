@@ -42,5 +42,5 @@ abstract class PhysObject (
     }
 
     open fun onTheGround(ground: Ground): Boolean =
-        (position.y - height / 2.0) - ground.position.y < 0.5 && abs(speed.y) < 0.001
+        (position.y - height / 2.0) - ground.position.y < 0.5 && abs(speed.y) < 0.8
 }

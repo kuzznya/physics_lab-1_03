@@ -11,8 +11,6 @@ class PhysSystem (
     val ground: Ground,
     private val g: Vector = Vector(0.0, -9.81)
 ) {
-    private val collided: MutableMap<Pair<PhysObject, PhysObject>, Boolean> = mutableMapOf()
-
     init {
         objects += ground
     }
@@ -22,85 +20,88 @@ class PhysSystem (
             return Vector(0.0, 0.0)
 
         val mg: Vector = g * body.mass
-        val N: Vector = if (body.intersects(ground)) mg * -1.0 else Vector(0.0, 0.0)
+        val N: Vector = if (body.onTheGround(ground)) mg * cos(mg.angle(ground.normal)) else Vector(0.0, 0.0)
 
-        return (mg + N) / body.mass
+        val collisionForce: Vector =
+            objects.fold(Vector(0.0, 0.0)) { acc, otherBody ->
+                acc + getCollisionForce(body, otherBody, secondsPassed) }
+
+        return (mg + collisionForce + N) / body.mass
     }
 
-    private fun collide(body1: PhysObject, body2: PhysObject, elastic: Boolean = true) {
-        if (body1 == body2)
-            return
+    private fun getCollisionForce(body1: PhysObject, body2: PhysObject, secondsPassed: Double, elastic: Boolean = true): Vector {
+        return if (body1 != body2 && !(body2 is Ground && body1.onTheGround(body2)) && secondsPassed > 0.0)
+            getCollisionImpulse(body1, body2, elastic) / secondsPassed * 1.01
+        else
+            Vector(0.0, 0.0)
+
+    }
+
+    private fun getCollisionImpulse(body1: PhysObject, body2: PhysObject, elastic: Boolean = true): Vector {
+        if (body1 == body2 || body1 is Ground || !(body1.intersects(body2) || body2.intersects(body1)) || body2 is Ground && body1.speed.y > 0.0)
+            return Vector(0.0, 0.0)
 
         val centersVector: Vector =
-            when {
-                body1 is Ground -> body1.normal
-                body2 is Ground -> body2.normal
+            when (body2) {
+                is Ground -> body2.normal
                 else -> body2.position - body1.position
             }
 
         val body1Angle: Double = body1.speed.angle(centersVector)
         val body2Angle: Double = body2.speed.angle(centersVector)
 
-        val v1c: Vector = if (body1 is Ground) body1.speed else body1.speed.turn(-body1Angle) * cos(body1Angle)
-        val v1p: Vector = if (body1 is Ground) body1.speed else body1.speed.turn(PI / 2.0 - body1Angle) * sin(body1Angle)
+        if (cos(body1Angle) <= 0.0 && cos(body2Angle) >= 0.0)
+            return Vector(0.0, 0.0)
 
-        val v2c: Vector = if (body2 is Ground) body2.speed else body2.speed.turn(-body2Angle) * cos(body2Angle)
-        val v2p: Vector = if (body2 is Ground) body2.speed else body2.speed.turn(PI / 2.0 - body2Angle) * sin(body2Angle)
+        val v1c: Vector = if (body1 is Ground) body1.speed else
+            centersVector / centersVector.value() * body1.speed.value() * cos(body1Angle)
+        val v1p: Vector = if (body1 is Ground) body1.speed else
+            body1.speed - v1c
+
+        val v2c: Vector = if (body2 is Ground) body2.speed else
+            centersVector / centersVector.value() * body2.speed.value() * cos(body2Angle)
+
+        if (cos(body1Angle) > 0.0 && cos(body2Angle) > 0.0 && v2c.value() >= v1c.value() ||
+            cos(body1Angle) < 0.0 && cos(body2Angle) < 0.0 && v1c.value() >= v2c.value())
+            return Vector(0.0, 0.0)
 
         if (elastic) {
-            body1.speed = (v1c * (body1.mass - body2.mass) + v2c * 2.0 * body2.mass) / (body1.mass + body2.mass) + v1p
-            body2.speed = (v2c * (body2.mass - body1.mass) + v1c * 2.0 * body1.mass) / (body1.mass + body2.mass) + v2p
+            val newSpeed: Vector = (v1c * (body1.mass - body2.mass) + v2c * 2.0 * body2.mass) /
+                    (body1.mass + body2.mass) + v1p
 
-            if (body2 is Ground) body1.speed.y /= 1.8
-            if (body1 is Ground) body2.speed.y /= 1.8
+            if (body2 is Ground) newSpeed.y /= 2.0
 
-            body1.move(0.01)
-            body2.move(0.01)
+            println("Collision: $body1 $body2 $newSpeed")
+
+            return (newSpeed - body1.speed) * body1.mass
         }
         else {
             TODO("non-elastic collision")
         }
     }
 
-    private fun checkAndCollide(body1: PhysObject, body2: PhysObject, elastic: Boolean = true) {
-        if (
-            body1 != body2 &&
-            collided[Pair(body1, body2)] != true && collided[Pair(body2, body1)] != true &&
-            !(body1 == ground && body2.onTheGround(ground)) &&
-            !(body2 == ground && body1.onTheGround(ground)) &&
-            (body1.intersects(body2) || body2.intersects(body1))
-        ) {
-            collide(body1, body2, elastic)
-            println("Collision: $body1 $body2 ${body1.speed} ${body2.speed}")
-            collided[Pair(body1, body2)] = true
-        }
-    }
-
     private fun checkForGround(body: PhysObject) {
         if (body is Ground)
             return
-        if ((body.intersects(ground) || ground.intersects(body)) && abs(body.speed.y) < 0.2) {
+        if ((body.intersects(ground) || ground.intersects(body)) && abs(body.speed.y) < 0.8) {
             body.speed.y = 0.0
             body.position.y = ground.position.y + body.height / 2.0
         }
     }
 
     fun compute(secondsPassed: Double) {
-        objects.forEach { body1 -> objects.forEach { body2 -> checkAndCollide(body1, body2) } }
-        for ((i, body1) in objects.withIndex()) {
-            for (body2 in objects.filterIndexed { index, _ -> index > i }) {
-                checkAndCollide(body1, body2)
-            }
+        val accelerations = objects.fold(emptyList<Vector>().toMutableList()) { list, body ->
+            (list + getAcceleration(body, secondsPassed)).toMutableList() }.toList()
+
+        objects.zip(accelerations).forEach { pair ->
+            pair.first.move(secondsPassed, pair.second)
+            checkForGround(pair.first)
         }
-        objects.forEach {
-            checkForGround(it)
-            it.move(secondsPassed, getAcceleration(it, secondsPassed))
-        }
-        collided.clear()
     }
 
     suspend fun start() {
         var time = System.currentTimeMillis()
+        objects.forEach { checkForGround(it) }
         repeat(Int.MAX_VALUE) {
             compute((System.currentTimeMillis() - time) / 1000.0)
             time = System.currentTimeMillis()
