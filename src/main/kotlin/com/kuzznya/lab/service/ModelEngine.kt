@@ -21,7 +21,7 @@ class ModelEngine (
     private val system: PhysSystem =
         PhysSystem(objects.toMutableList(), Ground())
 
-    private fun render() = Platform.runLater {
+    private fun render() {
         val ctx = canvas.graphicsContext2D
         ctx.fill = Color.WHITE
         ctx.fillRect(0.0, 0.0, canvas.width, canvas.height)
