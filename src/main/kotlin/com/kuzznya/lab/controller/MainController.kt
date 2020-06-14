@@ -138,7 +138,7 @@ class MainController {
                     h2,
                     Color.DARKRED
                 )
-            ).toMutableList(),
+            ),
             canvas)
         engine?.computation?.start()
     }

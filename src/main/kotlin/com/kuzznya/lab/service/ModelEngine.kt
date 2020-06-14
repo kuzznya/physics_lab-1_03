@@ -15,11 +15,11 @@ import kotlinx.coroutines.launch
 import kotlin.math.min
 
 class ModelEngine (
-    objects: MutableList<DrawablePhysObject>,
+    objects: List<DrawablePhysObject>,
     private val canvas: Canvas
 ) {
-    val system: PhysSystem =
-        PhysSystem(objects, Ground())
+    private val system: PhysSystem =
+        PhysSystem(objects.toMutableList(), Ground())
 
     private fun render() = Platform.runLater {
         val ctx = canvas.graphicsContext2D
