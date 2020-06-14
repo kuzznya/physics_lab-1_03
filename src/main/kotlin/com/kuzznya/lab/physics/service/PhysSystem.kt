@@ -1,15 +1,19 @@
-package com.kuzznya.lab.model
+package com.kuzznya.lab.physics.service
 
+import com.kuzznya.lab.model.Vector
+import com.kuzznya.lab.physics.g
+import com.kuzznya.lab.physics.GROUND_SPEED_CONSUME_COEFFICIENT
+import com.kuzznya.lab.physics.MIN_Y_GROUND_SPEED
+import com.kuzznya.lab.physics.model.DrawablePhysObject
+import com.kuzznya.lab.physics.model.Ground
+import com.kuzznya.lab.physics.model.PhysObject
 import kotlinx.coroutines.delay
-import kotlin.math.PI
 import kotlin.math.abs
 import kotlin.math.cos
-import kotlin.math.sin
 
 class PhysSystem (
     val objects: MutableList<DrawablePhysObject>,
-    val ground: Ground,
-    private val g: Vector = Vector(0.0, -9.81)
+    val ground: Ground
 ) {
     init {
         objects += ground
@@ -20,7 +24,9 @@ class PhysSystem (
             return Vector(0.0, 0.0)
 
         val mg: Vector = g * body.mass
-        val N: Vector = if (body.onTheGround(ground)) mg * cos(mg.angle(ground.normal)) else Vector(0.0, 0.0)
+        val N: Vector =
+            if (body.onTheGround(ground)) mg * cos(mg.angle(ground.normal))
+            else Vector(0.0, 0.0)
 
         val collisionForce: Vector =
             objects.fold(Vector(0.0, 0.0)) { acc, otherBody ->
@@ -29,16 +35,18 @@ class PhysSystem (
         return (mg + collisionForce + N) / body.mass
     }
 
-    private fun getCollisionForce(body1: PhysObject, body2: PhysObject, secondsPassed: Double, elastic: Boolean = true): Vector {
-        return if (body1 != body2 && !(body2 is Ground && body1.onTheGround(body2)) && secondsPassed > 0.0)
-            getCollisionImpulse(body1, body2, elastic) / secondsPassed * 1.01
+    private fun getCollisionForce(body1: PhysObject, body2: PhysObject,
+                                  secondsPassed: Double, elastic: Boolean = true): Vector =
+        if (body1 != body2 && !(body2 is Ground && body1.onTheGround(body2)) && secondsPassed > 0.0)
+            getCollisionImpulse(body1, body2, elastic) / secondsPassed
         else
             Vector(0.0, 0.0)
 
-    }
-
     private fun getCollisionImpulse(body1: PhysObject, body2: PhysObject, elastic: Boolean = true): Vector {
-        if (body1 == body2 || body1 is Ground || !(body1.intersects(body2) || body2.intersects(body1)) || body2 is Ground && body1.speed.y > 0.0)
+        if (body1 == body2 || body1 is Ground ||
+            !(body1.intersects(body2) || body2.intersects(body1)) ||
+            body2 is Ground && body1.speed.y > 0.0
+        )
             return Vector(0.0, 0.0)
 
         val centersVector: Vector =
@@ -69,7 +77,7 @@ class PhysSystem (
             val newSpeed: Vector = (v1c * (body1.mass - body2.mass) + v2c * 2.0 * body2.mass) /
                     (body1.mass + body2.mass) + v1p
 
-            if (body2 is Ground) newSpeed.y /= 2.0
+            if (body2 is Ground) newSpeed.y *= GROUND_SPEED_CONSUME_COEFFICIENT
 
             println("Collision: $body1 $body2 $newSpeed")
 
@@ -83,7 +91,7 @@ class PhysSystem (
     private fun checkForGround(body: PhysObject) {
         if (body is Ground)
             return
-        if ((body.intersects(ground) || ground.intersects(body)) && abs(body.speed.y) < 0.8) {
+        if ((body.intersects(ground) || ground.intersects(body)) && abs(body.speed.y) < MIN_Y_GROUND_SPEED) {
             body.speed.y = 0.0
             body.position.y = ground.position.y + body.height / 2.0
         }

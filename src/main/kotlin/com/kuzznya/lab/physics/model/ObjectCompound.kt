@@ -1,5 +1,8 @@
-package com.kuzznya.lab.model
+package com.kuzznya.lab.physics.model
 
+import com.kuzznya.lab.model.Point
+import com.kuzznya.lab.model.Scale
+import com.kuzznya.lab.model.Vector
 import javafx.scene.canvas.GraphicsContext
 
 class ObjectCompound(objects: List<DrawablePhysObject>, speed: Vector) :
@@ -25,7 +28,7 @@ class ObjectCompound(objects: List<DrawablePhysObject>, speed: Vector) :
     fun centerOfMass(): Point = Point(
         objects.sumByDouble { it.mass * it.position.x } / super.mass,
         objects.sumByDouble { it.mass * it.position.y } / super.mass
-        )
+    )
 
     override fun move(secondsPassed: Double) {
         super.move(secondsPassed)

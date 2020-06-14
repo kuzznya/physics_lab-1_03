@@ -1,5 +1,8 @@
-package com.kuzznya.lab.model
+package com.kuzznya.lab.physics.model
 
+import com.kuzznya.lab.model.Point
+import com.kuzznya.lab.model.Scale
+import com.kuzznya.lab.model.Vector
 import javafx.scene.canvas.GraphicsContext
 
 class Ground : DrawablePhysObject(

@@ -1,5 +1,8 @@
-package com.kuzznya.lab.model
+package com.kuzznya.lab.physics.model
 
+import com.kuzznya.lab.model.Point
+import com.kuzznya.lab.model.Vector
+import com.kuzznya.lab.physics.MIN_Y_GROUND_SPEED
 import kotlin.math.*
 
 abstract class PhysObject (
@@ -42,5 +45,5 @@ abstract class PhysObject (
     }
 
     open fun onTheGround(ground: Ground): Boolean =
-        (position.y - height / 2.0) - ground.position.y < 0.5 && abs(speed.y) < 0.8
+        (position.y - height / 2.0) - ground.position.y < 0.5 && abs(speed.y) < MIN_Y_GROUND_SPEED
 }
