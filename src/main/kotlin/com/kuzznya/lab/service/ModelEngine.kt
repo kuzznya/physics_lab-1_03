@@ -1,11 +1,9 @@
 package com.kuzznya.lab.service
 
 import com.kuzznya.lab.model.*
-import com.kuzznya.lab.physics.model.Block
 import com.kuzznya.lab.physics.model.DrawablePhysObject
 import com.kuzznya.lab.physics.model.Ground
-import com.kuzznya.lab.physics.service.PhysSystem
-import javafx.application.Platform
+import com.kuzznya.lab.physics.PhysSystem
 import javafx.scene.canvas.Canvas
 import javafx.scene.paint.Color
 import kotlinx.coroutines.CoroutineStart

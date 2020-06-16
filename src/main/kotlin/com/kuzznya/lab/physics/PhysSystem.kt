@@ -1,9 +1,6 @@
-package com.kuzznya.lab.physics.service
+package com.kuzznya.lab.physics
 
 import com.kuzznya.lab.model.Vector
-import com.kuzznya.lab.physics.g
-import com.kuzznya.lab.physics.GROUND_SPEED_CONSUME_COEFFICIENT
-import com.kuzznya.lab.physics.MIN_Y_GROUND_SPEED
 import com.kuzznya.lab.physics.model.DrawablePhysObject
 import com.kuzznya.lab.physics.model.Ground
 import com.kuzznya.lab.physics.model.PhysObject
