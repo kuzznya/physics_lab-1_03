@@ -1,9 +1,13 @@
 package com.kuzznya.lab.physics
 
+import com.kuzznya.lab.model.PhysEvent
 import com.kuzznya.lab.model.Vector
 import com.kuzznya.lab.physics.model.DrawablePhysObject
 import com.kuzznya.lab.physics.model.Ground
 import com.kuzznya.lab.physics.model.PhysObject
+import javafx.application.Platform
+import javafx.collections.FXCollections
+import javafx.collections.ObservableList
 import kotlinx.coroutines.delay
 import kotlin.math.abs
 import kotlin.math.cos
@@ -14,6 +18,15 @@ class PhysSystem (
 ) {
     init {
         objects += ground
+    }
+
+    private var startTime: Long = 0
+    val events: ObservableList<PhysEvent> = FXCollections.observableList(emptyList<PhysEvent>().toMutableList())
+
+    private fun writeToLog(eventType: PhysEvent.Type, body: PhysObject, newSpeed: Vector) {
+        events += PhysEvent(System.currentTimeMillis() - startTime,
+            eventType,
+            body, body.position.copy(), body.speed.copy(), newSpeed)
     }
 
     private fun getAcceleration(body: PhysObject, secondsPassed: Double): Vector {
@@ -59,15 +72,15 @@ class PhysSystem (
             return Vector(0.0, 0.0)
 
         val v1c: Vector = if (body1 is Ground) body1.speed else
-            centersVector / centersVector.value() * body1.speed.value() * cos(body1Angle)
+            centersVector / centersVector.value * body1.speed.value * cos(body1Angle)
         val v1p: Vector = if (body1 is Ground) body1.speed else
             body1.speed - v1c
 
         val v2c: Vector = if (body2 is Ground) body2.speed else
-            centersVector / centersVector.value() * body2.speed.value() * cos(body2Angle)
+            centersVector / centersVector.value * body2.speed.value * cos(body2Angle)
 
-        if (cos(body1Angle) > 0.0 && cos(body2Angle) > 0.0 && v2c.value() >= v1c.value() ||
-            cos(body1Angle) < 0.0 && cos(body2Angle) < 0.0 && v1c.value() >= v2c.value())
+        if (cos(body1Angle) > 0.0 && cos(body2Angle) > 0.0 && v2c.value >= v1c.value ||
+            cos(body1Angle) < 0.0 && cos(body2Angle) < 0.0 && v1c.value >= v2c.value)
             return Vector(0.0, 0.0)
 
         if (elastic) {
@@ -76,7 +89,7 @@ class PhysSystem (
 
             if (body2 is Ground) newSpeed.y *= GROUND_SPEED_CONSUME_COEFFICIENT
 
-            println("Collision: $body1 $body2 $newSpeed")
+            writeToLog(PhysEvent.Type.COLLISION, body1, newSpeed)
 
             return (newSpeed - body1.speed) * body1.mass
         }
@@ -105,7 +118,9 @@ class PhysSystem (
     }
 
     suspend fun start() {
+        events.clear()
         var time = System.currentTimeMillis()
+        startTime = time
         objects.forEach { checkForGround(it) }
         while (true) {
             compute((System.currentTimeMillis() - time) / 1000.0)

@@ -1,14 +1,19 @@
 package com.kuzznya.lab.controller
 
+import com.kuzznya.lab.model.PhysEvent
 import com.kuzznya.lab.model.Point
 import com.kuzznya.lab.model.Vector
 import com.kuzznya.lab.physics.model.Block
 import com.kuzznya.lab.service.ModelEngine
 import com.kuzznya.lab.view.ResizableCanvas
+import javafx.beans.Observable
+import javafx.collections.ListChangeListener
+import javafx.collections.ObservableList
 import javafx.event.ActionEvent
 import javafx.fxml.FXML
 import javafx.scene.canvas.Canvas
 import javafx.scene.control.CheckBox
+import javafx.scene.control.TextArea
 import javafx.scene.control.TextField
 import javafx.scene.layout.AnchorPane
 import javafx.scene.paint.Color
@@ -47,6 +52,8 @@ class MainController {
     private lateinit var isElasticBox: CheckBox
     @FXML
     private lateinit var canvasPane: AnchorPane
+    @FXML
+    private lateinit var logOutput: TextArea
 
     private var engine: ModelEngine? = null
 
@@ -140,6 +147,11 @@ class MainController {
                 )
             ),
             canvas)
+
+        engine?.eventLog?.addListener { change: ListChangeListener.Change<out PhysEvent> ->
+            logOutput.text = change.list.fold("") { acc: String, physEvent: PhysEvent -> acc + physEvent.toString() }
+        }
+
         engine?.computation?.start()
     }
 

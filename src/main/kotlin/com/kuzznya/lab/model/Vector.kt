@@ -6,7 +6,8 @@ data class Vector (
     var x: Double,
     var y: Double
 ) {
-    fun value() = sqrt(x.pow(2) + y.pow(2))
+    val value: Double
+        get() = sqrt(x.pow(2) + y.pow(2))
 
     operator fun plus(b: Vector): Vector =
         Vector(x + b.x, y + b.y)

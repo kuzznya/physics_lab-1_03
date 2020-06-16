@@ -4,6 +4,9 @@ import com.kuzznya.lab.model.*
 import com.kuzznya.lab.physics.model.DrawablePhysObject
 import com.kuzznya.lab.physics.model.Ground
 import com.kuzznya.lab.physics.PhysSystem
+import javafx.application.Platform
+import javafx.collections.ListChangeListener
+import javafx.collections.ObservableList
 import javafx.scene.canvas.Canvas
 import javafx.scene.paint.Color
 import kotlinx.coroutines.CoroutineStart
@@ -19,7 +22,10 @@ class ModelEngine (
     private val system: PhysSystem =
         PhysSystem(objects.toMutableList(), Ground())
 
-    private fun render() {
+    val eventLog: ObservableList<PhysEvent>
+        get() = system.events
+
+    private fun render() = Platform.runLater {
         val ctx = canvas.graphicsContext2D
         ctx.fill = Color.WHITE
         ctx.fillRect(0.0, 0.0, canvas.width, canvas.height)
