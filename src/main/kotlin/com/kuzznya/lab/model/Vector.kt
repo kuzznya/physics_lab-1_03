@@ -27,8 +27,11 @@ data class Vector (
         )
 
     fun angle(v: Vector): Double =
-        acos(
-            (x * v.x + y * v.y) /
-                    sqrt(x.pow(2) + y.pow(2)) / sqrt(v.x.pow(2) + v.y.pow(2))
-        )
+        if (this == Vector(0.0, 0.0) || v == Vector(0.0, 0.0))
+            0.0
+        else
+            acos(
+                (x * v.x + y * v.y) /
+                        sqrt(x.pow(2) + y.pow(2)) / sqrt(v.x.pow(2) + v.y.pow(2))
+            )
 }
