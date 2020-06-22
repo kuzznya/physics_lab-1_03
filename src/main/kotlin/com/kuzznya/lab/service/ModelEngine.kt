@@ -17,10 +17,11 @@ import kotlin.math.min
 
 class ModelEngine (
     objects: List<DrawablePhysObject>,
-    private val canvas: Canvas
+    private val canvas: Canvas,
+    elasticCollisions: Boolean = true
 ) {
     private val system: PhysSystem =
-        PhysSystem(objects.toMutableList(), Ground())
+        PhysSystem(objects.toMutableList(), Ground(), elasticCollisions)
 
     val eventLog: ObservableList<PhysEvent>
         get() = system.events

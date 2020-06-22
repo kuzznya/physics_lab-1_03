@@ -14,7 +14,8 @@ import kotlin.math.cos
 
 class PhysSystem (
     val objects: MutableList<DrawablePhysObject>,
-    val ground: Ground
+    private val ground: Ground,
+    private val elasticCollisions: Boolean = true
 ) {
     init {
         objects += ground
@@ -40,7 +41,7 @@ class PhysSystem (
 
         val collisionForce: Vector =
             objects.fold(Vector(0.0, 0.0)) { acc, otherBody ->
-                acc + getCollisionForce(body, otherBody, secondsPassed) }
+                acc + getCollisionForce(body, otherBody, secondsPassed, elasticCollisions) }
 
         return (mg + collisionForce + N) / body.mass
     }
@@ -52,7 +53,7 @@ class PhysSystem (
         else
             Vector(0.0, 0.0)
 
-    private fun getCollisionImpulse(body1: PhysObject, body2: PhysObject, elastic: Boolean = true): Vector {
+    private fun getCollisionImpulse(body1: PhysObject, body2: PhysObject, elastic: Boolean): Vector {
         if (body1 == body2 || body1 is Ground ||
             !(body1.intersects(body2) || body2.intersects(body1)) ||
             body2 is Ground && body1.speed.y > 0.0
@@ -61,7 +62,7 @@ class PhysSystem (
 
         val centersVector: Vector =
             when (body2) {
-                is Ground -> body2.normal
+                is Ground -> body2.normal * -1.0
                 else -> body2.position - body1.position
             }
 
@@ -71,10 +72,8 @@ class PhysSystem (
         if (cos(body1Angle) <= 0.0 && cos(body2Angle) >= 0.0)
             return Vector(0.0, 0.0)
 
-        val v1c: Vector = if (body1 is Ground) body1.speed else
-            centersVector / centersVector.value * body1.speed.value * cos(body1Angle)
-        val v1p: Vector = if (body1 is Ground) body1.speed else
-            body1.speed - v1c
+        val v1c: Vector = centersVector / centersVector.value * body1.speed.value * cos(body1Angle)
+        val v1p: Vector = body1.speed - v1c
 
         val v2c: Vector = if (body2 is Ground) body2.speed else
             centersVector / centersVector.value * body2.speed.value * cos(body2Angle)
@@ -83,19 +82,19 @@ class PhysSystem (
             cos(body1Angle) < 0.0 && cos(body2Angle) < 0.0 && v1c.value >= v2c.value)
             return Vector(0.0, 0.0)
 
-        if (elastic) {
-            val newSpeed: Vector = (v1c * (body1.mass - body2.mass) + v2c * 2.0 * body2.mass) /
-                    (body1.mass + body2.mass) + v1p
+        var newSpeed: Vector =
+            ((v2c - v1c) * (if (elastic) 1.0 else 0.0) * body2.mass +
+                    v1c * body1.mass + v2c * body2.mass) /
+                    (body1.mass + body2.mass) + v1p * (if (elastic || body2 is Ground) 1.0 else 0.0)
 
-            if (body2 is Ground) newSpeed.y *= GROUND_SPEED_CONSUME_COEFFICIENT
+        if (body2 is Ground && elastic) newSpeed.y *= GROUND_SPEED_CONSUME_COEFFICIENT
 
+        newSpeed -= centersVector * 0.005
+
+        if (body1.speed.value >= 0.8 || body2.speed.value >= 0.8)
             writeToLog(PhysEvent.Type.COLLISION, body1, newSpeed)
 
-            return (newSpeed - body1.speed) * body1.mass
-        }
-        else {
-            TODO("non-elastic collision")
-        }
+        return (newSpeed - body1.speed) * body1.mass
     }
 
     private fun checkForGround(body: PhysObject) {

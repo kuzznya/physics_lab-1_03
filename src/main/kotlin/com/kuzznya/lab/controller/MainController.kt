@@ -6,9 +6,8 @@ import com.kuzznya.lab.model.Vector
 import com.kuzznya.lab.physics.model.Block
 import com.kuzznya.lab.service.ModelEngine
 import com.kuzznya.lab.view.ResizableCanvas
-import javafx.beans.Observable
+import javafx.application.Platform
 import javafx.collections.ListChangeListener
-import javafx.collections.ObservableList
 import javafx.event.ActionEvent
 import javafx.fxml.FXML
 import javafx.scene.canvas.Canvas
@@ -120,6 +119,8 @@ class MainController {
     private fun start() = runBlocking {
         engine?.let { cancelComputation() }
 
+        logOutput.clear()
+
         updateParams()
 
         val canvas: Canvas = ResizableCanvas()
@@ -146,10 +147,16 @@ class MainController {
                     Color.DARKRED
                 )
             ),
-            canvas)
+            canvas,
+            isElasticBox.isSelected
+        )
 
         engine?.eventLog?.addListener { change: ListChangeListener.Change<out PhysEvent> ->
-            logOutput.text = change.list.fold("") { acc: String, physEvent: PhysEvent -> acc + physEvent.toString() }
+            change.next()
+            val changeText = change.addedSubList.fold("") { acc: String, physEvent: PhysEvent -> acc + physEvent.toString() }
+            Platform.runLater {
+                logOutput.text += changeText
+            }
         }
 
         engine?.computation?.start()
