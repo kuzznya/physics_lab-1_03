@@ -83,15 +83,13 @@ class PhysSystem (
             return Vector(0.0, 0.0)
 
         var newSpeed: Vector =
-            ((v2c - v1c) * (if (elastic) 1.0 else 0.0) * body2.mass +
+            ((v2c - v1c) * (if (elastic) 1.0 - COR_ERROR else COR_ERROR) * body2.mass +
                     v1c * body1.mass + v2c * body2.mass) /
-                    (body1.mass + body2.mass) + v1p * (if (elastic || body2 is Ground) 1.0 else 0.0)
+                    (body1.mass + body2.mass) + v1p * (if (elastic || body2 is Ground) 1.0 - COR_ERROR else COR_ERROR)
 
         if (body2 is Ground && elastic) newSpeed.y *= GROUND_SPEED_CONSUME_COEFFICIENT
 
-        newSpeed -= centersVector * 0.005
-
-        if (body1.speed.value >= 0.8 || body2.speed.value >= 0.8)
+        if (body1.speed.value >= MIN_COLLISION_SPEED_TO_LOG || body2.speed.value >= MIN_COLLISION_SPEED_TO_LOG)
             writeToLog(PhysEvent.Type.COLLISION, body1, newSpeed)
 
         return (newSpeed - body1.speed) * body1.mass
