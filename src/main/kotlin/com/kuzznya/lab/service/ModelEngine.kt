@@ -5,7 +5,6 @@ import com.kuzznya.lab.physics.model.DrawablePhysObject
 import com.kuzznya.lab.physics.model.Ground
 import com.kuzznya.lab.physics.PhysSystem
 import javafx.application.Platform
-import javafx.collections.ListChangeListener
 import javafx.collections.ObservableList
 import javafx.scene.canvas.Canvas
 import javafx.scene.paint.Color

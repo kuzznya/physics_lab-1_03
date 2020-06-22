@@ -5,7 +5,6 @@ import com.kuzznya.lab.model.Vector
 import com.kuzznya.lab.physics.model.DrawablePhysObject
 import com.kuzznya.lab.physics.model.Ground
 import com.kuzznya.lab.physics.model.PhysObject
-import javafx.application.Platform
 import javafx.collections.FXCollections
 import javafx.collections.ObservableList
 import kotlinx.coroutines.delay
@@ -82,7 +81,7 @@ class PhysSystem (
             cos(body1Angle) < 0.0 && cos(body2Angle) < 0.0 && v1c.value >= v2c.value)
             return Vector(0.0, 0.0)
 
-        var newSpeed: Vector =
+        val newSpeed: Vector =
             ((v2c - v1c) * (if (elastic) 1.0 - COR_ERROR else COR_ERROR) * body2.mass +
                     v1c * body1.mass + v2c * body2.mass) /
                     (body1.mass + body2.mass) + v1p * (if (elastic || body2 is Ground) 1.0 - COR_ERROR else COR_ERROR)
@@ -104,7 +103,7 @@ class PhysSystem (
         }
     }
 
-    fun compute(secondsPassed: Double) {
+    private fun compute(secondsPassed: Double) {
         val accelerations = objects.fold(emptyList<Vector>().toMutableList()) { list, body ->
             (list + getAcceleration(body, secondsPassed)).toMutableList() }.toList()
 
