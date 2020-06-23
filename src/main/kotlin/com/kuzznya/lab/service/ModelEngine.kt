@@ -31,8 +31,8 @@ class ModelEngine (
         ctx.fillRect(0.0, 0.0, canvas.width, canvas.height)
 
         val scale = Scale(
-            Point(-100.0, -60.0),
-            Point(100.0, 140.0),
+            Point(-10.0, -5.0),
+            Point(10.0, 15.0),
             0.0,
             min(canvas.width, canvas.height),
             true
